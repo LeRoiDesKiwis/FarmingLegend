@@ -23,11 +23,13 @@ public abstract class ReactionMenu {
 
     }
 
-    public void addReaction(String reac){
+    public ReactionMenu addReaction(String reac){
 
         reactions.add(reac);
+        return this;
 
     }
+
 
     public void close(){
 
@@ -36,7 +38,7 @@ public abstract class ReactionMenu {
 
     }
 
-    public void build(Message target, Message msg){
+    public ReactionMenu build(Message target, Message msg){
         core.addMenu(this);
         this.msg = msg;
         this.target = target;
@@ -48,6 +50,25 @@ public abstract class ReactionMenu {
             target.addReaction(s).queue();
 
         }
+
+        new Thread(() -> {
+
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if(core.getMenus().contains(this)) {
+
+                close();
+
+                channel.sendMessage(core.getMain().getUtils().embedError("Vous avez attendu trop longtemps !")).queue();
+            }
+
+        }, "reaction-"+msg.getId()).start();
+
+        return this;
 
     }
 

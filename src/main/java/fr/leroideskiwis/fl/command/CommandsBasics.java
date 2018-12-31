@@ -6,15 +6,47 @@ import fr.leroideskiwis.fl.commands.CommandCore;
 import fr.leroideskiwis.fl.commands.SimpleCommand;
 import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 
 import java.awt.*;
 
 public class CommandsBasics {
+
+    @Command(name="deleteaccount")
+    public void delete(Player p, Main main, TextChannel channel, Message message){
+
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.RED).setTitle("Confirmation");
+        builder.setDescription("Êtes-vous **SÛR** de vouloir supprimer votre compte ? Votre argent, votre inventaire, vos niveaux, **TOUT** sera perdu et sera irrécupérable !");
+        channel.sendMessage(builder.build()).queue(msg -> {
+
+            new ReactionMenu(main.getReactionCore()) {
+                @Override
+                public void onReaction(MessageReaction.ReactionEmote clicked) {
+
+                    if(clicked.getName().equals("❌")){
+                        channel.sendMessage("Heureux que vous ayez changer d'avis :D !").queue();
+                    } else {
+
+                        main.getPlayers().remove(p);
+
+                        channel.sendMessage(new EmbedBuilder()
+                                .setColor(Color.RED)
+                                .setAuthor("Suppression du compte de "+member.getUser().getName(), null, member.getUser().getAvatarUrl())
+                                .setDescription("Aïe ! Je déteste les adieux :'(")
+                                .build()).queue();
+
+                    }
+
+                    close();
+                }
+            }.addReaction("❌").addReaction("✅").build(msg, message);
+
+        });
+
+    }
 
     @Command(name="help", description="affiche la liste des commandes")
     public void help(Player p, Main main, CommandCore core, Member m, User user, TextChannel channel){

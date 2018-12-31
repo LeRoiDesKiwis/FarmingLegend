@@ -26,7 +26,7 @@ public class CommandCore {
     public CommandCore(Main main) {
         this.main = main;
         registerCommand(new CommandsBasics());
-        registerCommand(new CommandsFarm());
+        registerCommand(new CommandsFarm(main));
         registerCommand(new CommandsAdmin());
     }
 
@@ -121,6 +121,8 @@ public class CommandCore {
             }
 
             builder.append(".");
+
+            e.getTextChannel().sendMessage(builder.toString()).queue();
 
         } else {
 

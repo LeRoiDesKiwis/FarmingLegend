@@ -101,11 +101,6 @@ public class Main implements Runnable{
         jda.awaitReady();
         reactionCore = new ReactionCore(this);
         core = new CommandCore(this);
-        new Thread(() -> {
-
-            jda.getPresence().setGame(Game.playing("in "+jda.getGuilds().size()+" servers"));
-
-        }, "thread-guilds").start();
 
         jda.addEventListener(new EventCommand(this));
 
