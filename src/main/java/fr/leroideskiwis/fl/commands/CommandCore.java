@@ -1,10 +1,13 @@
 package fr.leroideskiwis.fl.commands;
 
 import fr.leroideskiwis.fl.Main;
+import fr.leroideskiwis.fl.command.CommandsAdmin;
 import fr.leroideskiwis.fl.command.CommandsBasics;
+import fr.leroideskiwis.fl.command.CommandsFarm;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
+import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
@@ -13,9 +16,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CommandCore {
 
@@ -25,73 +26,87 @@ public class CommandCore {
     public CommandCore(Main main) {
         this.main = main;
         registerCommand(new CommandsBasics());
+        registerCommand(new CommandsFarm());
+        registerCommand(new CommandsAdmin());
     }
 
     public List<SimpleCommand> getSimpleCommands() {
         return simpleCommands;
     }
 
+    public boolean checkJob(Player p, Job need){
+
+        return need.getEmote() == null || p.getJob() == need;
+
+    }
+
+    public void createAccount(TextChannel channel, User u, Message message){
+        channel.sendMessage("Avant toute chose, créons un compte !");
+
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Création d'un compte");
+
+        for(Job job : Job.values()){
+
+            if(job.getEmote() == null) continue;
+
+            builder.addField(job.getEmote()+" "+main.getUtils().firstMaj(job.toString().toLowerCase()), "Votre but principal est de "+job.getFinalQuest(), false);
+
+        }
+
+        channel.sendMessage(builder.build()).queue(msg -> {
+
+            ReactionMenu reactionMenu = new ReactionMenu(main.getReactionCore()) {
+                @Override
+                public void onReaction(MessageReaction.ReactionEmote clicked) {
+
+                    Job job = main.getUtils().getJobByEmote(clicked.getName());
+
+                    if(job == null){
+
+                        channel.sendMessage(main.getUtils().embedError("Ce job n'existe pas !")).queue();
+                        return;
+                    }
+
+                    main.getPlayers().add(new Player(job, u));
+                    close();
+
+                    channel.sendMessage(member.getAsMention()+", Vous avez maintenant le métier "+job.toString().toLowerCase()+".\nVotre but principal est désormais : **"+job.getFinalQuest()+"**").queue();
+
+                }
+            };
+
+            for(Job job : Job.values()){
+                if(job.getEmote() == null) continue;
+
+                reactionMenu.addReaction(job.getEmote());
+
+            }
+
+            reactionMenu.build(msg, message);
+
+        });
+
+    }
+
     public void commandUser(String cmd, MessageReceivedEvent e){
 
         if(main.getUtils().getPlayer(e.getAuthor()) == null){
 
-            e.getTextChannel().sendMessage("Avant toute chose, créons un compte !");
-
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("Création d'un compte");
-
-            for(Job job : Job.values()){
-
-                builder.addField(job.toString().toLowerCase(), "cliquez sur la réaction "+job.getEmote(), false);
-
-            }
-
-            e.getTextChannel().sendMessage(builder.build()).queue(msg -> {
-
-               ReactionMenu reactionMenu = new ReactionMenu() {
-                   @Override
-                   public void onReaction(ReactionMenu menu, MessageReaction.ReactionEmote clicked, Message msg, Member m, TextChannel channel) {
-
-                       Job job = main.getUtils().getJobByEmote(clicked.getName());
-
-                       if(job == null){
-
-                           e.getTextChannel().sendMessage(main.getUtils().embedError("Ce job n'existe pas !")).queue();
-                           return;
-                       }
-
-                       main.getPlayers().add(new Player(job, e.getAuthor()));
-
-                       msg.delete().queue();
-
-                       channel.sendMessage("Vous avez maintenant le job "+job.toString().toLowerCase()).queue();
-
-                   }
-               };
-
-               for(Job job : Job.values()){
-
-                   reactionMenu.addReaction(job.getEmote());
-
-               }
-
-               reactionMenu.build(msg, main);
-
-               main.getReactionCore().addMenu(reactionMenu);
-
-            });
+            createAccount(e.getTextChannel(), e.getAuthor(), e.getMessage());
 
             return;
         }
+
+        Player p = main.getUtils().getPlayer(e.getAuthor());
 
         List<SimpleCommand> available = new ArrayList<>();
 
         for(SimpleCommand simpleCommand : simpleCommands){
 
-            if(simpleCommand.getName().startsWith(cmd.split(" ")[0])) available.add(simpleCommand);
+            if(checkJob(p, simpleCommand.getJob()) && (!simpleCommand.needOp() || main.checkDev(e.getAuthor())) && simpleCommand.getName().startsWith(cmd.split(" ")[0])) available.add(simpleCommand);
 
         }
-
         if(available.size() == 0) return;
         if(available.size() > 1){
 
@@ -109,7 +124,7 @@ public class CommandCore {
 
         } else {
 
-            execute(cmd, available.get(0), e);
+            execute(cmd, available.get(0), e, p);
 
         }
 
@@ -139,7 +154,7 @@ public class CommandCore {
 
                 Command cmd = m.getAnnotation(Command.class);
 
-                simpleCommands.add(new SimpleCommand(object, m, cmd.name(), cmd.description()));
+                simpleCommands.add(new SimpleCommand(object, m, cmd.name(), cmd.description(), cmd.job(), cmd.op()));
 
             }
 
@@ -147,7 +162,7 @@ public class CommandCore {
 
     }
 
-    private void execute(String cmd, SimpleCommand simpleCommand, MessageReceivedEvent e) {
+    private void execute(String cmd, SimpleCommand simpleCommand, MessageReceivedEvent e, Player player) {
 
         Parameter[] params = simpleCommand.getMethod().getParameters();
         Object[] objects = new Object[params.length];
@@ -164,6 +179,8 @@ public class CommandCore {
             else if(params[i].getType() == Main.class) objects[i] = main;
             else if(params[i].getType() == getClass()) objects[i] = this;
             else if(params[i].getType() == MessageReceivedEvent.class) objects[i] = e;
+            else if(params[i].getType() == Player.class) objects[i] = player;
+            else if(params[i].getType() == Utils.class) objects[i] = main.getUtils();
 
         }
 

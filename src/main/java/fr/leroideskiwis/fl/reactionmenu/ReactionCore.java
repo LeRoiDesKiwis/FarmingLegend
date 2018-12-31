@@ -30,5 +30,9 @@ public class ReactionCore {
     }
 
 
+    public void deleteMenu(ReactionMenu reactionMenu) {
 
+        menus.remove(reactionMenu);
+
+    }
 }

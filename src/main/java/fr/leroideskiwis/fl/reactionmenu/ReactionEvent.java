@@ -23,9 +23,9 @@ public class ReactionEvent extends ListenerAdapter {
 
         for(ReactionMenu menu : core.getMenus()){
 
-            if(menu.msg.getId().equals(event.getMessageId())){
+            if(menu.member.getUser().getId().equals(event.getMember().getUser().getId()) && menu.target.getId().equals(event.getMessageId())){
 
-                menu.onReaction(menu, event.getReactionEmote(), menu.msg, menu.member, menu.channel);
+                menu.onReaction(event.getReactionEmote());
 
             }
 

@@ -10,7 +10,9 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.User;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
@@ -21,7 +23,7 @@ public class Main implements Runnable{
 
     private JDA jda;
     private CommandCore core;
-    private char prefixe = '&';
+    private char prefixe = '!';
     private List<Player> players = new ArrayList<>();
     private ReactionCore reactionCore;
 
@@ -32,6 +34,38 @@ public class Main implements Runnable{
     public Utils getUtils(){
 
         return new Utils(this);
+
+    }
+
+    public boolean checkDev(User user){
+
+        try {
+
+            File file = new File("./admins.txt");
+
+            if (!file.exists()) {
+                file.createNewFile();
+                return false;
+            } else {
+
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line = reader.readLine();
+
+                while(line != null){
+
+                    if(user.getId().equals(line)) return true;
+
+                    line = reader.readLine();
+
+                }
+
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return false;
 
     }
 

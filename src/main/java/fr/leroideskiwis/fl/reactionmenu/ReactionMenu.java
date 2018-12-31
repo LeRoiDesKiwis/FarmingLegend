@@ -9,12 +9,19 @@ import java.util.List;
 
 public abstract class ReactionMenu {
 
-    public Message msg;
+    private final ReactionCore core;
+    public Message msg, target;
     public Member member;
     public TextChannel channel;
     private List<String> reactions = new ArrayList<>();
 
-    public abstract void onReaction(ReactionMenu menu, MessageReaction.ReactionEmote clicked, Message msg, Member m, TextChannel channel);
+    public abstract void onReaction(MessageReaction.ReactionEmote clicked);
+
+    public ReactionMenu(ReactionCore core) {
+
+        this.core = core;
+
+    }
 
     public void addReaction(String reac){
 
@@ -22,14 +29,23 @@ public abstract class ReactionMenu {
 
     }
 
-    public void build(Message msg, Main main){
+    public void close(){
+
+        target.delete().queue();
+        core.deleteMenu(this);
+
+    }
+
+    public void build(Message target, Message msg){
+        core.addMenu(this);
         this.msg = msg;
+        this.target = target;
         this.member = msg.getMember();
         this.channel = msg.getTextChannel();
 
         for(String s : reactions){
 
-            msg.addReaction(s).queue();
+            target.addReaction(s).queue();
 
         }
 
