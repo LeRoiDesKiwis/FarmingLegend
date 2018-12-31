@@ -48,23 +48,36 @@ public class CommandCore {
 
             e.getTextChannel().sendMessage(builder.build()).queue(msg -> {
 
-               ReactionMenu menu = new ReactionMenu() {
-                    @Override
-                    public void onReaction(String clicked, Message msg, Member m, TextChannel channel) {
-                        main.getPlayers().add(new Player(main.getUtils().getJobByEmote()))
+               ReactionMenu reactionMenu = new ReactionMenu() {
+                   @Override
+                   public void onReaction(ReactionMenu menu, MessageReaction.ReactionEmote clicked, Message msg, Member m, TextChannel channel) {
 
-                        msg.delete().queue();
+                       Job job = main.getUtils().getJobByEmote(clicked.getName());
 
-                    }
-                };
+                       if(job == null){
+
+                           e.getTextChannel().sendMessage(main.getUtils().embedError("Ce job n'existe pas !")).queue();
+                           return;
+                       }
+
+                       main.getPlayers().add(new Player(job, e.getAuthor()));
+
+                       msg.delete().queue();
+
+                       channel.sendMessage("Vous avez maintenant le job "+job.toString().toLowerCase()).queue();
+
+                   }
+               };
 
                for(Job job : Job.values()){
 
-                   menu.addReaction(job.getEmote());
+                   reactionMenu.addReaction(job.getEmote());
 
                }
 
-               menu.build(msg);
+               reactionMenu.build(msg, main);
+
+               main.getReactionCore().addMenu(reactionMenu);
 
             });
 
@@ -75,7 +88,7 @@ public class CommandCore {
 
         for(SimpleCommand simpleCommand : simpleCommands){
 
-            if(simpleCommand.getName().startsWith(cmd)) available.add(simpleCommand);
+            if(simpleCommand.getName().startsWith(cmd.split(" ")[0])) available.add(simpleCommand);
 
         }
 
@@ -105,7 +118,17 @@ public class CommandCore {
 
 
     public String[] getArgs(String cmd){
-        return null;
+
+        String[] split = cmd.split(" ");
+        String[] args = new String[split.length-1];
+
+        for(int i = 0; i < args.length; i++){
+
+            args[i] = split[i+1];
+
+        }
+
+        return args;
     }
 
     private void registerCommand(Object object){

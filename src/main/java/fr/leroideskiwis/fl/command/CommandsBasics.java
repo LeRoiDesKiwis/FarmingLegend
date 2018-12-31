@@ -5,6 +5,7 @@ import fr.leroideskiwis.fl.commands.Command;
 import fr.leroideskiwis.fl.commands.CommandCore;
 import fr.leroideskiwis.fl.commands.SimpleCommand;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;

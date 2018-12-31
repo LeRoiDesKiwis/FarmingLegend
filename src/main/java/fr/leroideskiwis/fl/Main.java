@@ -25,6 +25,10 @@ public class Main implements Runnable{
     private List<Player> players = new ArrayList<>();
     private ReactionCore reactionCore;
 
+    public ReactionCore getReactionCore() {
+        return reactionCore;
+    }
+
     public Utils getUtils(){
 
         return new Utils(this);

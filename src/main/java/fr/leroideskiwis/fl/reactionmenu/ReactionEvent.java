@@ -19,11 +19,13 @@ public class ReactionEvent extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
 
+        if(event.getUser().equals(core.getMain().getJda().getSelfUser())) return;
+
         for(ReactionMenu menu : core.getMenus()){
 
-            if(menu.member.equals(event.getMember())){
+            if(menu.msg.getId().equals(event.getMessageId())){
 
-                menu.onReaction(/*to be completed*/null, menu.msg, menu.member, menu.channel);
+                menu.onReaction(menu, event.getReactionEmote(), menu.msg, menu.member, menu.channel);
 
             }
 
