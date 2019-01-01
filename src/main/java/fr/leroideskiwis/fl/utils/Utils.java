@@ -10,6 +10,9 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.requests.RestAction;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 
@@ -75,7 +78,14 @@ public class Utils {
     public Object floatInt(Float f){
 
         if(f % 1 == 0) return f.intValue();
-        else return f;
+        else {
+
+            BigDecimal bd = new BigDecimal(f);
+            bd = bd.setScale(2, BigDecimal.ROUND_FLOOR);
+            f = bd.floatValue();
+            return f;
+
+        }
 
     }
 

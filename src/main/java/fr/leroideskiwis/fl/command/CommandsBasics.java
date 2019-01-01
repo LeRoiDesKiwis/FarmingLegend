@@ -7,6 +7,7 @@ import fr.leroideskiwis.fl.commands.SimpleCommand;
 import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
+import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 
@@ -131,11 +132,13 @@ public class CommandsBasics {
 
         EmbedBuilder builder = new EmbedBuilder().setColor(Color.ORANGE).setAuthor("Profile de "+p.getUser().getName(), null, p.getUser().getAvatarUrl());
 
-        builder.addField("Job :", p.getJob().toString().toLowerCase()+" "+p.getJob().getEmote(), false);
+        builder.addField("Job :", p.getJob().toString().toLowerCase()+" "+p.getJob().getEmote(), true);
         builder.addField(":heart: Vie :", p.getHealth()+"/"+p.getMaxHealth(), true);
-        builder.addField(":moneybag: Argent :", p.getMoney()+"€", false);
+        builder.addField(":meat_on_bone: faim :",new Utils().floatInt(p.getFood())+"/10",true);
+        builder.addField(":zap: énergie :", p.getEnergy()+"/"+p.getMaxEnergy(), true);
+        builder.addField(":moneybag: Argent :", p.getMoney()+"€", true);
         builder.addField(":trophy: Niveau : ", p.getLevel()+"", true);
-        builder.addField("xp : ", p.getXp()+"/"+p.getNeededXp(), false);
+        builder.addField("xp : ", p.getXp()+"/"+p.getNeededXp(), true);
 
         channel.sendMessage(builder.build()).queue();
 

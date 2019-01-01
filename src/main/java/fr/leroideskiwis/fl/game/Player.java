@@ -16,15 +16,67 @@ public class Player {
     private int maxHealth;
     private Inventory inventory;
     private int xp;
+    private float food;
+    private int energy;
 
     public Player(Job job, User user) {
         this.job = job;
         this.user = user;
         this.maxHealth = job.getDefaultHealth();
+        this.food = 10f;
+        this.energy = 100;
         this.health = this.maxHealth;
         this.level = 1;
         this.money = 50;
         this.inventory = new Inventory(this);
+
+
+        //This thread don't work (please pull request ?)
+        Thread thread = new Thread(() -> {
+
+            try {
+                Thread.sleep(5000);
+                updateEnergy();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+
+        }, "energy-"+user.getId());
+        thread.setDaemon(true);
+        thread.start();
+
+    }
+
+    public void addFood(float f){
+        setFood(food +f);
+    }
+
+    public int getMaxEnergy(){ return 100; }
+
+    public void checkEnergy(){
+        if(energy > getMaxEnergy()) this.energy = getMaxEnergy();
+        if(energy < 0) this.energy = 0;
+
+    }
+
+    public void updateEnergy(){
+
+        this.energy = energy + 1;
+        checkEnergy();
+
+    }
+
+    public boolean checkEnoughEnergy(int enough){
+
+        return energy > enough;
+
+    }
+
+    public void removeEnergy(int next){
+
+        this.energy -= next;
+        checkEnergy();
+
     }
 
     public Job getJob() {
@@ -60,6 +112,24 @@ public class Player {
 
     }
 
+    public float getFood() {
+        return food;
+    }
+
+    public void setFood(float f){
+
+        this.food = f;
+
+        if(food < 0) food =0;
+
+    }
+
+    public void removeFood(float f){
+
+        setFood(food -f);
+
+    }
+
     public Inventory getInventory() {
         return inventory;
 
@@ -84,5 +154,9 @@ public class Player {
     public int getXp() {
 
         return xp;
+    }
+
+    public int getEnergy() {
+        return energy;
     }
 }

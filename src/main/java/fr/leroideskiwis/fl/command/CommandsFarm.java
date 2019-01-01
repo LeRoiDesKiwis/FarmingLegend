@@ -6,6 +6,7 @@ import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Material;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.utils.MessageHandler;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -38,6 +39,8 @@ public class CommandsFarm {
     @Command(name="cook", job={Job.PECHEUR, /*Job.CHASSEUR*/})
     public void onCook(TextChannel channel, Player player, String[] args){
 
+
+
         Material mat;
         Integer count;
         List<Item> items;
@@ -54,6 +57,13 @@ public class CommandsFarm {
 
                 channel.sendMessage(main.getUtils().embedError("Syntaxe : " + main.getPrefixeAsString() + "cook <nom du matériel> <nombre à cuir>")).queue();
                 return;
+        }
+
+        if((player.getFood() == 0) || player.getFood()-count*0.05f <= 0){
+
+            channel.sendMessage(new MessageHandler().embedError("Vous n'avez plus ou pas assez de nourriture ! (vous avez besoin de **"+count*0.05f+"** de nourriture et vous n'en avez que **"+ player.getFood()+"**)")).queue();
+
+            return;
         }
 
             for(Item item : player.getInventory().getItems()){
@@ -73,21 +83,25 @@ public class CommandsFarm {
 
             for(int i = 0; i < count; i++){
 
+                if(items.get(i).getMaterial() != mat) continue;
+
                 switch(items.get(i).getMaterial()){
                     case CLOWNFISH:
-                        items.remove(items.get(i));
                         player.getInventory().removeItem(items.get(i).getMaterial(), 1);
                         items.get(i).setType(Material.COOKED_CLOWNFISH);
+
                         break;
                     case FISH:
-                        items.remove(items.get(i));
+
                         player.getInventory().removeItem(items.get(i).getMaterial(), 1);
                         items.get(i).setType(Material.COOKED_FISH);
+
                         break;
                     case SALMON:
-                        items.remove(items.get(i));
+
                         player.getInventory().removeItem(items.get(i).getMaterial(), 1);
                         items.get(i).setType(Material.COOKED_SALMON);
+
                         break;
 
                 }
@@ -97,7 +111,7 @@ public class CommandsFarm {
             player.getInventory().addItems(items);
 
             channel.sendMessage("Vous avez cuit "+count+" "+mat.toString().toLowerCase()+" !").queue();
-
+            player.removeFood(0.05f*count);
 
     }
 
@@ -124,9 +138,15 @@ public class CommandsFarm {
 
     public void farm(Player p, TextChannel channel){
 
+        if(!p.checkEnoughEnergy(5)){
+            channel.sendMessage(new MessageHandler().embedError(":zap: Vous n'avez plus assez d'énergie ! :confused:")).queue();
+
+            return;
+        }
+
         List<Item> items = new ArrayList<>();
 
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < p.getFood(); i++) {
 
             if(Math.random() < 0.33) continue;
 
@@ -151,9 +171,19 @@ public class CommandsFarm {
             }
         }
 
-        p.getInventory().stack(items);
+        if(items.isEmpty()) {
 
+            channel.sendMessage(new EmbedBuilder().setColor(Color.RED)
+                    .setTitle(p.getJob().getEmote()+"Impossible de farmer ! :sob:")
+                    .setDescription("Oh tient ! Vous n'avez rien eu ! Vous avez surement faim :stuck_out_tongue:").build()).queue();
+
+        }
+
+        p.getInventory().stack(items);
         EmbedBuilder builder = new EmbedBuilder().setColor(Color.ORANGE).setTitle("Vous avez gagné");
+
+        p.removeFood(0.1f);
+        p.removeEnergy(5);
 
         items.forEach(i -> {
             p.getInventory().addItem(i);
