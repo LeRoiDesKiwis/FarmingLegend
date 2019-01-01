@@ -7,6 +7,7 @@ import fr.leroideskiwis.fl.command.CommandsFarm;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
+import fr.leroideskiwis.fl.utils.MessageHandler;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
@@ -34,9 +35,9 @@ public class CommandCore {
         return simpleCommands;
     }
 
-    public boolean checkJob(Player p, Job need){
+    public boolean checkJob(Player p, Job[] need){
 
-        return need.getEmote() == null || p.getJob() == need;
+        return need[0].getEmote() == null || (p != null && main.getUtils().contains(need, p.getJob()));
 
     }
 
@@ -59,6 +60,13 @@ public class CommandCore {
             ReactionMenu reactionMenu = new ReactionMenu(main.getReactionCore()) {
                 @Override
                 public void onReaction(MessageReaction.ReactionEmote clicked) {
+
+                    if(clicked.getName().equals("❌")){
+                        channel.sendMessage(new MessageHandler().embedInfo("Vous avez annuler votre inscription !")).queue();
+                        close();
+
+                        return;
+                    }
 
                     Job job = main.getUtils().getJobByEmote(clicked.getName());
 
@@ -83,20 +91,13 @@ public class CommandCore {
 
             }
 
-            reactionMenu.build(msg, message);
+            reactionMenu.addReaction("❌").build(msg, message);
 
         });
 
     }
 
     public void commandUser(String cmd, MessageReceivedEvent e){
-
-        if(main.getUtils().getPlayer(e.getAuthor()) == null){
-
-            createAccount(e.getTextChannel(), e.getAuthor(), e.getMessage());
-
-            return;
-        }
 
         Player p = main.getUtils().getPlayer(e.getAuthor());
 
@@ -125,6 +126,12 @@ public class CommandCore {
             e.getTextChannel().sendMessage(builder.toString()).queue();
 
         } else {
+
+            if(p == null){
+
+                e.getTextChannel().sendMessage("Rappel : vous n'avez pas de compte. Créez un compte en faisant "+main.getPrefixeAsString()+"inscription").queue();
+
+            }
 
             execute(cmd, available.get(0), e, p);
 
@@ -181,7 +188,17 @@ public class CommandCore {
             else if(params[i].getType() == Main.class) objects[i] = main;
             else if(params[i].getType() == getClass()) objects[i] = this;
             else if(params[i].getType() == MessageReceivedEvent.class) objects[i] = e;
-            else if(params[i].getType() == Player.class) objects[i] = player;
+            else if(params[i].getType() == Player.class) {
+
+                if(player == null){
+
+                    e.getTextChannel().sendMessage(main.getUtils().embedError("Cette commande n'hésite un compte... Nous allons vous en créer un :D")).queue();
+
+                    createAccount(e.getTextChannel(), e.getAuthor(), e.getMessage());
+                    return;
+                }
+                objects[i] = player;
+            }
             else if(params[i].getType() == Utils.class) objects[i] = main.getUtils();
 
         }
@@ -199,6 +216,15 @@ public class CommandCore {
         });
         thread.setDaemon(true);
         thread.start();
+
+        new Thread(() -> {
+
+            while (thread.isAlive()) {
+            }
+
+            if(player != null) player.levelUp(e.getTextChannel());
+
+        }).start();
 
     }
 

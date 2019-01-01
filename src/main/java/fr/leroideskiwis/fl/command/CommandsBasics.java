@@ -8,7 +8,6 @@ import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 
 import java.awt.*;
@@ -49,7 +48,7 @@ public class CommandsBasics {
     }
 
     @Command(name="help", description="affiche la liste des commandes")
-    public void help(Player p, Main main, CommandCore core, Member m, User user, TextChannel channel){
+    public void help(Main main, CommandCore core, Member m, User user, TextChannel channel){
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(Color.GRAY);
@@ -59,7 +58,7 @@ public class CommandsBasics {
 
         for(SimpleCommand cmd : core.getSimpleCommands()){
 
-            if((!cmd.needOp() || main.checkDev(user)) && core.checkJob(p, cmd.getJob())) {
+            if((!cmd.needOp() || main.checkDev(user)) && core.checkJob(main.getUtils().getPlayer(user), cmd.getJob())) {
                 builder.addField(cmd.getName(), cmd.getDescription(), false);
                 count++;
             }
@@ -69,6 +68,43 @@ public class CommandsBasics {
         builder.setTitle(count+" commandes avec le préfixe "+main.getPrefixeAsString());
 
         channel.sendMessage(builder.build()).queue();
+
+    }
+
+    @Command(name="suggest")
+    public void onSuggest(User u, Main main, TextChannel textChannel, String[] args){
+
+        for (User dev : main.getDevs()) {
+
+            dev.openPrivateChannel().queue(pv -> {
+
+                String str = "";
+
+                for(int i = 0; i < args.length; i++){
+
+                    str+= args[i]+" ";
+
+                }
+
+                pv.sendMessage(new EmbedBuilder()
+                        .setColor(Color.ORANGE)
+                        .setAuthor("Nouvelle suggestion de "+u.getName(), null, u.getAvatarUrl())
+                        .setDescription(str)
+                        .build()
+                        ).queue();
+
+            });
+
+        }
+
+        textChannel.sendMessage(u.getAsMention()+", votre suggestion à bien été envoyée !").queue();
+
+    }
+
+    @Command(name="inscription")
+    public void inscript(Player p, Main main, TextChannel channel){
+
+        channel.sendMessage(main.getUtils().embedError("Vous êtes déjà inscrit !")).queue();
 
     }
 
@@ -99,6 +135,7 @@ public class CommandsBasics {
         builder.addField(":heart: Vie :", p.getHealth()+"/"+p.getMaxHealth(), true);
         builder.addField(":moneybag: Argent :", p.getMoney()+"€", false);
         builder.addField(":trophy: Niveau : ", p.getLevel()+"", true);
+        builder.addField("xp : ", p.getXp()+"/"+p.getNeededXp(), false);
 
         channel.sendMessage(builder.build()).queue();
 
@@ -107,7 +144,7 @@ public class CommandsBasics {
     @Command(name="github",description="Obtenir le lien du github")
     public void github(TextChannel channel){
 
-        channel.sendMessage("Vous voulez aider au développement du bot ou vous êtes juste curieux de savoir comment il est codé ? Alors ce lien est pour vous : https://github.com/LeRoiDesKiwis/FarmingLegend/").queue();
+        channel.sendMessage("Vous voulez contribuer au développement du bot ou vous êtes juste curieux de savoir comment il est codé ? Alors ce lien est pour vous : https://github.com/LeRoiDesKiwis/FarmingLegend/").queue();
 
     }
 

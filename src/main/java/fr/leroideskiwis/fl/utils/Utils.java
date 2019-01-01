@@ -25,11 +25,29 @@ public class Utils {
 
     public List<Material> getMaterialJobs(Job job){
 
+        return getMaterialJobs(Arrays.asList(job));
+
+    }
+
+    public boolean contains(Object[] objects, Object o){
+
+        for(Object obj : objects){
+
+            if(obj.equals(o)) return true;
+
+        }
+
+        return false;
+
+    }
+
+    public List<Material> getMaterialJobs(List<Job> jobs){
+
         List<Material> mats = new ArrayList<>();
 
         for(Material mat : Material.values()){
 
-           if(mat.getJob() == job) mats.add(mat);
+           if(jobs.contains(mat.getJob())) mats.add(mat);
 
         }
 
@@ -39,16 +57,16 @@ public class Utils {
 
     public String firstMaj(String s){
 
-        String finalS = "";
+        char[] chars = s.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
 
-        for(char c : s.toCharArray()){
+        return new String(chars);
 
-            if(c == s.toCharArray()[0]) finalS+=Character.toUpperCase(c);
-            else finalS+=c;
+    }
 
+    public boolean checkArgs(String[] args, int count){
 
-        }
-        return finalS;
+        return args.length >= count;
 
     }
 

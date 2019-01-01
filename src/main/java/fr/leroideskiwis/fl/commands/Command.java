@@ -14,7 +14,7 @@ public @interface Command {
 
     String name();
     String description() default "Aucune description.";
-    Job job() default Job.ALL;
+    Job[] job() default Job.ALL;
 
     boolean op() default false;
 }

@@ -21,7 +21,8 @@ public class ReactionEvent extends ListenerAdapter {
 
         if(event.getUser().equals(core.getMain().getJda().getSelfUser())) return;
 
-        for(ReactionMenu menu : core.getMenus()){
+        for(int i =0; i < core.getMenus().size(); i++){
+            ReactionMenu menu = core.getMenus().get(i);
 
             if(menu.member.getUser().getId().equals(event.getMember().getUser().getId()) && menu.target.getId().equals(event.getMessageId())){
 

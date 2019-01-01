@@ -6,6 +6,7 @@ import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Material;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -33,6 +34,73 @@ public class CommandsFarm {
         farm(player, channel);
 
     }
+
+    @Command(name="cook", job={Job.PECHEUR, /*Job.CHASSEUR*/})
+    public void onCook(TextChannel channel, Player player, String[] args){
+
+        Material mat;
+        Integer count;
+        List<Item> items;
+
+        try {
+
+            mat = Material.valueOf(args[0].toUpperCase());
+            count = Integer.parseInt(args[1]);
+
+            if(mat.getJob() != player.getJob()) throw new Exception();
+
+            items = new ArrayList<>();
+            }catch(Throwable throwable) {
+
+                channel.sendMessage(main.getUtils().embedError("Syntaxe : " + main.getPrefixeAsString() + "cook <nom du matériel> <nombre à cuir>")).queue();
+                return;
+        }
+
+            for(Item item : player.getInventory().getItems()){
+
+                if(item.getMaterial() == mat) items.add(item);
+
+            }
+
+            player.getInventory().unstack(items);
+
+
+            if(items.size() < count){
+                channel.sendMessage(new Utils(main).embedError("Vous n'avez pas assez de "+mat.toString().toLowerCase()+" !")).queue();
+                return;
+            }
+            player.getInventory().unstack(player.getInventory().getItems());
+
+            for(int i = 0; i < count; i++){
+
+                switch(items.get(i).getMaterial()){
+                    case CLOWNFISH:
+                        items.remove(items.get(i));
+                        player.getInventory().removeItem(items.get(i).getMaterial(), 1);
+                        items.get(i).setType(Material.COOKED_CLOWNFISH);
+                        break;
+                    case FISH:
+                        items.remove(items.get(i));
+                        player.getInventory().removeItem(items.get(i).getMaterial(), 1);
+                        items.get(i).setType(Material.COOKED_FISH);
+                        break;
+                    case SALMON:
+                        items.remove(items.get(i));
+                        player.getInventory().removeItem(items.get(i).getMaterial(), 1);
+                        items.get(i).setType(Material.COOKED_SALMON);
+                        break;
+
+                }
+
+            }
+
+            player.getInventory().addItems(items);
+
+            channel.sendMessage("Vous avez cuit "+count+" "+mat.toString().toLowerCase()+" !").queue();
+
+
+    }
+
     @Command(name="recolte",job = Job.AGRICULTEUR)
     public void onRecolte(Player player, TextChannel channel){
         farm(player, channel);
@@ -50,27 +118,50 @@ public class CommandsFarm {
     }
     @Command(name="forge",job = Job.FORGERON)
     public void onForge(Player player, TextChannel channel){
-        farm(player, channel);
+        channel.sendMessage("Commande en développement...").queue();
 
     }
 
     public void farm(Player p, TextChannel channel){
 
-        List<Material> matChance = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
 
-        for(Material mat : main.getUtils().getMaterialJobs(p.getJob())){
+        for(int i = 0; i < 10; i++) {
 
-            for(int i = 0; i < mat.getChance(); i++){
+            if(Math.random() < 0.33) continue;
 
-                matChance.add(mat);
+            Item item = null;
 
+            while (item == null) {
+
+                for (Material mat : main.getUtils().getMaterialJobs(p.getJob())) {
+
+                    if(p.getLevel() < mat.getLevel()) continue;
+
+                    if (Math.random() < mat.getChance()) {
+
+                        int count = (int) (mat.getChance() * 10);
+
+                        item = new Item(mat, new Random().nextInt(count < 1 ? 1 : count) + 1);
+                        items.add(item);
+
+                    }
+
+                }
             }
-
         }
 
-        Item item = new Item(matChance.get(new Random().nextInt(matChance.size())), new Random().nextInt(5));
+        p.getInventory().stack(items);
 
-        channel.sendMessage(new EmbedBuilder().setColor(Color.ORANGE).setTitle("Vous avez gagner").addField(item.getMaterial().toString(), item.getCount()+"", false).build()).queue();
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.ORANGE).setTitle("Vous avez gagné");
+
+        items.forEach(i -> {
+            p.getInventory().addItem(i);
+            builder.addField(main.getUtils().firstMaj(i.getMaterial().toString().toLowerCase()), i.getCount()+"", true);
+
+        });
+
+        channel.sendMessage(builder.build()).queue();
 
     }
 }

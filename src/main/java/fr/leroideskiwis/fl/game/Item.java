@@ -18,9 +18,16 @@ public class Item {
         return count;
     }
 
-    public void setCount(int i) {
+    public Item setCount(int i) {
 
         this.count = i;
+        return this;
 
+    }
+
+    public Item setType(Material i) {
+
+        material = i;
+        return this;
     }
 }

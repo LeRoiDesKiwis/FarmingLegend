@@ -11,9 +11,9 @@ public class SimpleCommand {
     private String name;
     private String description;
     private Object object;
-    private Job job;
+    private Job[] job;
 
-    public SimpleCommand(Object o, Method m, String name, String description, Job job, boolean op) {
+    public SimpleCommand(Object o, Method m, String name, String description, Job[] job, boolean op) {
         this.m = m;
         this.object = o;
         this.name = name;
@@ -22,7 +22,7 @@ public class SimpleCommand {
         this.op = op;
     }
 
-    public Job getJob() {
+    public Job[] getJob() {
         return job;
     }
 

@@ -37,7 +37,7 @@ public class Main implements Runnable{
 
     }
 
-    public boolean checkDev(User user){
+    public List<User> getDevs(){
 
         try {
 
@@ -45,27 +45,36 @@ public class Main implements Runnable{
 
             if (!file.exists()) {
                 file.createNewFile();
-                return false;
+
             } else {
 
                 BufferedReader reader = new BufferedReader(new FileReader(file));
+                List<User> toReturn = new ArrayList<>();
                 String line = reader.readLine();
 
-                while(line != null){
+                while (line != null) {
 
-                    if(user.getId().equals(line)) return true;
+                    toReturn.add(jda.getUserById(line));
 
                     line = reader.readLine();
 
                 }
 
+                return toReturn;
             }
 
-        }catch(Exception e){
-            e.printStackTrace();
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
 
-        return false;
+        return null;
+
+
+    }
+
+    public boolean checkDev(User user){
+
+        return getDevs().contains(user);
 
     }
 
