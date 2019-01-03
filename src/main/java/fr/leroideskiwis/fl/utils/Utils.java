@@ -1,6 +1,7 @@
 package fr.leroideskiwis.fl.utils;
 
 import fr.leroideskiwis.fl.Main;
+import fr.leroideskiwis.fl.game.Item;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Material;
 import fr.leroideskiwis.fl.game.Player;
@@ -86,6 +87,98 @@ public class Utils {
             return f;
 
         }
+
+    }
+
+    public void startSecureThread(Runnable runnable, String name){
+
+        new Thread(() -> {
+
+            Thread th = new Thread(runnable);
+            if(name != null) th.setName(name);
+            th.setDaemon(true);
+            th.start();
+
+            try {
+                th.join(60000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if(th.isAlive()){
+
+                while(th.getState() != Thread.State.TIMED_WAITING & th.getState() !=Thread.State.WAITING) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                th.interrupt();
+                if(th.isAlive()) th.stop();
+                System.err.println("Le thread "+th.getName()+" a été interrompu par sécurité.");
+
+            }
+
+        }, "Sous-thread").start();
+
+    }
+
+    public Object[] stackAnItem(Material mat, int stack, List<Item> items){
+
+        int count = 0;
+
+        Item item = new Item(mat, 0);
+
+        while(count != stack){
+
+            boolean isBreak = false;
+            int current = count;
+
+            for(int a = 0; a < items.size(); a++){
+
+                for(int b = a+1; b < items.size(); b++){
+
+                    if(items.get(a).getMaterial() == items.get(b).getMaterial()) {
+                        count++;
+                        isBreak = true;
+
+                        item.setCount(item.getCount()+1);
+                        items.remove(items.get(b));
+
+                        break;
+                    }
+
+                }
+
+                if(isBreak) break;
+
+            }
+
+            if(count == current) return null;
+
+        }
+
+        if(item.getCount() < stack) return null;
+
+        return new Object[]{items, item};
+
+    }
+
+    public String generateStringWithRandomChars(){
+
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+
+        StringBuilder builder = new StringBuilder();
+
+        for(int i = 0; i < 6; i++){
+
+            builder.append(chars[new Random().nextInt(chars.length)]);
+
+        }
+
+        return builder.toString();
 
     }
 

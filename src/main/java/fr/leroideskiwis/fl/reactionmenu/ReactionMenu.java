@@ -9,7 +9,8 @@ import java.util.List;
 
 public abstract class ReactionMenu {
 
-    private final ReactionCore core;
+    private ReactionCore core;
+    private int timeout;
     public Message msg, target;
     public Member member;
     public TextChannel channel;
@@ -17,7 +18,8 @@ public abstract class ReactionMenu {
 
     public abstract void onReaction(MessageReaction.ReactionEmote clicked);
 
-    public ReactionMenu(ReactionCore core) {
+    public ReactionMenu(ReactionCore core, int timeout) {
+        this.timeout = timeout;
 
         this.core = core;
 
@@ -29,7 +31,6 @@ public abstract class ReactionMenu {
         return this;
 
     }
-
 
     public void close(){
 
@@ -54,7 +55,7 @@ public abstract class ReactionMenu {
         new Thread(() -> {
 
             try {
-                Thread.sleep(20000);
+                Thread.sleep(timeout*1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

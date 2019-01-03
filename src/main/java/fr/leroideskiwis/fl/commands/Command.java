@@ -1,5 +1,6 @@
 package fr.leroideskiwis.fl.commands;
 
+import fr.leroideskiwis.fl.RoleCommand;
 import fr.leroideskiwis.fl.game.Job;
 
 import java.lang.annotation.ElementType;
@@ -15,6 +16,7 @@ public @interface Command {
     String name();
     String description() default "Aucune description.";
     Job[] job() default Job.ALL;
+    String syntaxe() default "Une erreur s'est produite !";
 
-    boolean op() default false;
+    RoleCommand role() default RoleCommand.ALL;
 }

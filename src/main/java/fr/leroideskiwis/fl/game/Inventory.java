@@ -52,6 +52,10 @@ public class Inventory {
 
     }
 
+    public void setItems(List<Item> items){
+        this.items = items;
+    }
+
     public void stack(List<Item> items){
 
         for(int a = 0; a < items.size(); a++) {
@@ -94,6 +98,7 @@ public class Inventory {
     }
 
     public List<Item> getItems() {
+        stack();
         return items;
     }
 

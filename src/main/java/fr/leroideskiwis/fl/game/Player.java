@@ -29,14 +29,15 @@ public class Player {
         this.level = 1;
         this.money = 50;
         this.inventory = new Inventory(this);
-
-
-        //This thread don't work (please pull request ?)
+        
         Thread thread = new Thread(() -> {
 
             try {
-                Thread.sleep(5000);
-                updateEnergy();
+
+                while(true) {
+                    updateEnergy();
+                    Thread.sleep(5000);
+                }
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -120,6 +121,8 @@ public class Player {
 
         this.food = f;
 
+        if(food > 10) food = 10;
+
         if(food < 0) food =0;
 
     }
@@ -145,10 +148,18 @@ public class Player {
             maxHealth+=1;
             if (channel != null) channel.sendMessage(new EmbedBuilder()
                     .setColor(Color.ORANGE)
-                    .setAuthor(getUser().getName() + " à level up !", null, getUser().getAvatarUrl())
+                    .setAuthor(getUser().getName() + " à level up ! Vous avez re-gagner de la vie et de la nourriture ! (votre barre d'énergie à aussi été rechargée)", null, getUser().getAvatarUrl())
                     .setDescription("Il est maintenant niveau " + level + " !")
                     .build()).queue();
+
+            addFood(4f);
+            addHealth(getMaxHealth()/4);
         }
+    }
+
+    private void addHealth(int i) {
+
+        this.health+=i;
     }
 
     public int getXp() {
@@ -158,5 +169,10 @@ public class Player {
 
     public int getEnergy() {
         return energy;
+    }
+
+    public void addXp(int i) {
+        this.xp+=i;
+
     }
 }

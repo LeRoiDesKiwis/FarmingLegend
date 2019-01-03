@@ -1,11 +1,13 @@
 package fr.leroideskiwis.fl.commands;
 
 import fr.leroideskiwis.fl.Main;
+import fr.leroideskiwis.fl.RoleCommand;
 import fr.leroideskiwis.fl.command.CommandsAdmin;
 import fr.leroideskiwis.fl.command.CommandsBasics;
 import fr.leroideskiwis.fl.command.CommandsFarm;
 import fr.leroideskiwis.fl.game.Job;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.reactionmenu.ReactionCore;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
 import fr.leroideskiwis.fl.utils.MessageHandler;
 import fr.leroideskiwis.fl.utils.Utils;
@@ -14,6 +16,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -57,7 +60,7 @@ public class CommandCore {
 
         channel.sendMessage(builder.build()).queue(msg -> {
 
-            ReactionMenu reactionMenu = new ReactionMenu(main.getReactionCore()) {
+            ReactionMenu reactionMenu = new ReactionMenu(main.getReactionCore(), 10000) {
                 @Override
                 public void onReaction(MessageReaction.ReactionEmote clicked) {
 
@@ -97,6 +100,12 @@ public class CommandCore {
 
     }
 
+    public boolean checkPerms(Guild g, User u, RoleCommand needed){
+
+        return needed == RoleCommand.ALL || main.checkDev(u) || (needed == RoleCommand.OWNER && u.equals(g.getOwner().getUser()));
+
+    }
+
     public void commandUser(String cmd, MessageReceivedEvent e){
 
         Player p = main.getUtils().getPlayer(e.getAuthor());
@@ -105,7 +114,7 @@ public class CommandCore {
 
         for(SimpleCommand simpleCommand : simpleCommands){
 
-            if(checkJob(p, simpleCommand.getJob()) && (!simpleCommand.needOp() || main.checkDev(e.getAuthor())) && simpleCommand.getName().startsWith(cmd.split(" ")[0])) available.add(simpleCommand);
+            if(checkJob(p, simpleCommand.getJob()) && checkPerms(e.getGuild(), e.getAuthor(), simpleCommand.getNeededRole()) && simpleCommand.getName().startsWith(cmd.split(" ")[0])) available.add(simpleCommand);
 
         }
         if(available.size() == 0) return;
@@ -127,13 +136,14 @@ public class CommandCore {
 
         } else {
 
-            if(p == null){
+            try {
 
-                e.getTextChannel().sendMessage("Rappel : vous n'avez pas de compte. Créez un compte en faisant "+main.getPrefixeAsString()+"inscription").queue();
+                execute(cmd, available.get(0), e, p);
+            }catch(Throwable throwable){
+
+                e.getTextChannel().sendMessage(new MessageHandler().embedError(available.get(0).getSyntaxe().replaceFirst("!s!", "Syntaxe : "))).queue();
 
             }
-
-            execute(cmd, available.get(0), e, p);
 
         }
 
@@ -163,7 +173,7 @@ public class CommandCore {
 
                 Command cmd = m.getAnnotation(Command.class);
 
-                simpleCommands.add(new SimpleCommand(object, m, cmd.name(), cmd.description(), cmd.job(), cmd.op()));
+                simpleCommands.add(new SimpleCommand(object, m, cmd.name(), cmd.description(), cmd.job(), cmd.role(), cmd.syntaxe()));
 
             }
 
@@ -171,7 +181,7 @@ public class CommandCore {
 
     }
 
-    private void execute(String cmd, SimpleCommand simpleCommand, MessageReceivedEvent e, Player player) {
+    private void execute(String cmd, SimpleCommand simpleCommand, MessageReceivedEvent e, Player player) throws InvocationTargetException, IllegalAccessException {
 
         Parameter[] params = simpleCommand.getMethod().getParameters();
         Object[] objects = new Object[params.length];
@@ -180,6 +190,7 @@ public class CommandCore {
 
             if(params[i].getType() == Guild.class) objects[i] = e.getGuild();
             else if(params[i].getType() == TextChannel.class) objects[i] = e.getTextChannel();
+            else if(params[i].getType() == ReactionCore.class) objects[i] = main.getReactionCore();
             else if(params[i].getType() == Member.class) objects[i] = e.getMember();
             else if(params[i].getType() == User.class) objects[i] = e.getAuthor();
             else if(params[i].getType() == String[].class) objects[i] = getArgs(cmd);
@@ -203,28 +214,13 @@ public class CommandCore {
 
         }
 
-        Thread thread = new Thread(() -> {
 
-            try{
+        simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
 
-                simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
 
-            }catch(Exception ex){
-                ex.printStackTrace();
-            }
+        if(player != null) player.levelUp(e.getTextChannel());
 
-        });
-        thread.setDaemon(true);
-        thread.start();
 
-        new Thread(() -> {
-
-            while (thread.isAlive()) {
-            }
-
-            if(player != null) player.levelUp(e.getTextChannel());
-
-        }).start();
 
     }
 

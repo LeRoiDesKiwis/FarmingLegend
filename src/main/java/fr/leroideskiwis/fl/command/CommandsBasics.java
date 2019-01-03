@@ -5,13 +5,19 @@ import fr.leroideskiwis.fl.commands.Command;
 import fr.leroideskiwis.fl.commands.CommandCore;
 import fr.leroideskiwis.fl.commands.SimpleCommand;
 import fr.leroideskiwis.fl.game.Item;
+import fr.leroideskiwis.fl.game.ItemSell;
+import fr.leroideskiwis.fl.game.Material;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.reactionmenu.ReactionCore;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommandsBasics {
 
@@ -22,7 +28,7 @@ public class CommandsBasics {
         builder.setDescription("Êtes-vous **SÛR** de vouloir supprimer votre compte ? Votre argent, votre inventaire, vos niveaux, **TOUT** sera perdu et sera irrécupérable !");
         channel.sendMessage(builder.build()).queue(msg -> {
 
-            new ReactionMenu(main.getReactionCore()) {
+            new ReactionMenu(main.getReactionCore(), 10000) {
                 @Override
                 public void onReaction(MessageReaction.ReactionEmote clicked) {
 
@@ -49,7 +55,7 @@ public class CommandsBasics {
     }
 
     @Command(name="help", description="affiche la liste des commandes")
-    public void help(Main main, CommandCore core, Member m, User user, TextChannel channel){
+    public void help(Guild g, Main main, CommandCore core, Member m, User user, TextChannel channel){
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(Color.GRAY);
@@ -59,7 +65,7 @@ public class CommandsBasics {
 
         for(SimpleCommand cmd : core.getSimpleCommands()){
 
-            if((!cmd.needOp() || main.checkDev(user)) && core.checkJob(main.getUtils().getPlayer(user), cmd.getJob())) {
+            if(core.checkPerms(g, m.getUser(), cmd.getNeededRole()) && core.checkJob(main.getUtils().getPlayer(user), cmd.getJob())) {
                 builder.addField(cmd.getName(), cmd.getDescription(), false);
                 count++;
             }
@@ -149,6 +155,60 @@ public class CommandsBasics {
 
         channel.sendMessage("Vous voulez contribuer au développement du bot ou vous êtes juste curieux de savoir comment il est codé ? Alors ce lien est pour vous : https://github.com/LeRoiDesKiwis/FarmingLegend/").queue();
 
+    }
+
+    @Command(name="sell", syntaxe ="!s!sell <material> <count>")
+    public void shop(Message msg, ReactionCore core, String[] args, Player p, Main main, Guild g, TextChannel channel) throws Exception {
+
+        Material material = Material.valueOf(args[0].toUpperCase());
+        int count = Integer.parseInt(args[1]);
+
+        List<Item> unstack = new ArrayList<>(p.getInventory().getItems());
+
+        p.getInventory().unstack(unstack);
+
+        Object[] objects = main.getUtils().stackAnItem(material, count, unstack);
+
+        if(objects == null) throw new Exception();
+        Item item = (Item)objects[1];
+
+        p.getInventory().stack((List<Item>)objects[0]);
+
+        p.getInventory().setItems((List<Item>)objects[0]);
+
+        ItemSell sell = new ItemSell(main, item, p, 0);
+
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.CYAN)
+                .setTitle("Mettez un prix")
+                .setDescription("Prix : 0€"); channel.sendMessage(builder.build()).queue(m -> {
+
+            new ReactionMenu(core, 30000) {
+                @Override
+                public void onReaction(MessageReaction.ReactionEmote clicked) {
+                    if(clicked.getName().equals("\uD83C\uDD97")){
+
+                        channel.sendMessage("Vous avez vendu "+sell.getItem().getCount()+" "+sell.getItem().getMaterial().toString().toLowerCase()+" à "+sell.getPrice()+"€").queue();
+                        main.getSells().add(sell.build());
+                        close();
+                        return;
+                    }
+
+                    int currentPrice = sell.getPrice();
+                    int newPrice = clicked.getName().equals("➖") ? currentPrice-5 : currentPrice+5;
+                    sell.setPrice(newPrice);
+
+                    target.editMessage(builder.setDescription("Prix : "+newPrice+"€").build()).queue();
+
+                }
+
+            }.addReaction("➖").addReaction("➕").addReaction("\uD83C\uDD97").build(m, msg);
+
+        });
+
+        /*main.getSells().add(new ItemSell(main, item, p));
+
+        channel.sendMessage("Vous avez vendu "+item.getCount()+" "+item.getMaterial().toString().toLowerCase()).queue();
+        */
     }
 
 }

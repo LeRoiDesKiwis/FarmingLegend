@@ -39,8 +39,6 @@ public class CommandsFarm {
     @Command(name="cook", job={Job.PECHEUR, /*Job.CHASSEUR*/})
     public void onCook(TextChannel channel, Player player, String[] args){
 
-
-
         Material mat;
         Integer count;
         List<Item> items;
@@ -112,6 +110,7 @@ public class CommandsFarm {
 
             channel.sendMessage("Vous avez cuit "+count+" "+mat.toString().toLowerCase()+" !").queue();
             player.removeFood(0.05f*count);
+            player.addXp(count/2);
 
     }
 

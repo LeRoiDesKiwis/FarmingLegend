@@ -2,6 +2,7 @@ package fr.leroideskiwis.fl;
 
 import fr.leroideskiwis.fl.commands.CommandCore;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.game.ItemSell;
 import fr.leroideskiwis.fl.listeners.EventCommand;
 import fr.leroideskiwis.fl.reactionmenu.ReactionCore;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
@@ -9,15 +10,17 @@ import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main implements Runnable{
 
@@ -26,6 +29,28 @@ public class Main implements Runnable{
     private char prefixe = '!';
     private List<Player> players = new ArrayList<>();
     private ReactionCore reactionCore;
+    private Map<Guild, TextChannel> shops = new HashMap<>();
+    private List<ItemSell> sells = new ArrayList<>();
+
+    public List<ItemSell> getSells() {
+        return sells;
+    }
+
+    public ItemSell getSellById(String s){
+
+        for(ItemSell sell : sells){
+
+            if(sell.getId().equals(s)) return sell;
+
+        }
+
+        return null;
+
+    }
+
+    public Map<Guild, TextChannel> getShops() {
+        return shops;
+    }
 
     public ReactionCore getReactionCore() {
         return reactionCore;
@@ -79,6 +104,7 @@ public class Main implements Runnable{
     }
 
     public List<Player> getPlayers() {
+
         return players;
     }
 

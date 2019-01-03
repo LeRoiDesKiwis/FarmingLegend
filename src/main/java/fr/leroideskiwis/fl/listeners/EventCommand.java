@@ -4,6 +4,8 @@ import fr.leroideskiwis.fl.Main;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.util.Random;
+
 public class EventCommand extends ListenerAdapter {
 
     private Main main;
@@ -17,8 +19,8 @@ public class EventCommand extends ListenerAdapter {
 
         if(event.getMessage().getContentDisplay().startsWith(main.getPrefixeAsString())){
 
-            main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event);
-
+            main.getUtils().startSecureThread(() ->  main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event)
+            , "command-"+new Random().nextInt(9999));
         }
 
     }
