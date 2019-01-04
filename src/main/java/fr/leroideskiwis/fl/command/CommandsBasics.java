@@ -193,6 +193,8 @@ public class CommandsBasics {
                         return;
                     }
 
+
+
                     int currentPrice = sell.getPrice();
                     int newPrice = clicked.getName().equals("➖") ? currentPrice-5 : currentPrice+5;
                     sell.setPrice(newPrice);

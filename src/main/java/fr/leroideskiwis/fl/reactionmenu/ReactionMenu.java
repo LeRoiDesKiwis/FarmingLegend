@@ -1,7 +1,5 @@
 package fr.leroideskiwis.fl.reactionmenu;
 
-import fr.leroideskiwis.fl.Main;
-import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 
 import java.util.ArrayList;
@@ -15,12 +13,23 @@ public abstract class ReactionMenu {
     public Member member;
     public TextChannel channel;
     private List<String> reactions = new ArrayList<>();
+    private boolean deleteReaction;
+
+    public boolean isDeleteReaction(){
+        return deleteReaction;
+    }
 
     public abstract void onReaction(MessageReaction.ReactionEmote clicked);
 
+    public void setDeleteReaction(boolean bool){
+
+        this.deleteReaction = bool;
+
+    }
+
     public ReactionMenu(ReactionCore core, int timeout) {
         this.timeout = timeout;
-
+        this.deleteReaction = true;
         this.core = core;
 
     }

@@ -1,6 +1,7 @@
 package fr.leroideskiwis.fl.listeners;
 
 import fr.leroideskiwis.fl.Main;
+import fr.leroideskiwis.fl.game.Player;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -21,6 +22,43 @@ public class EventCommand extends ListenerAdapter {
 
             main.getUtils().startSecureThread(() ->  main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event)
             , "command-"+new Random().nextInt(9999));
+        } else {
+
+            main.getCore().getInscription().keySet().stream().filter(b -> b.getUser() == event.getAuthor()).forEach(u -> {
+
+                if(event.getMessage().getContentDisplay().equalsIgnoreCase("cancel")){
+
+                    event.getTextChannel().sendMessage("Vous avez annulé votre inscription !").queue();
+                    main.getCore().getInscription().remove(u);
+                    return;
+
+                }
+
+                int current = main.getCore().getInscription().get(u);
+
+                switch (current){
+
+                    case 0:
+
+                        event.getTextChannel().sendMessage("Veuillez choisir un prénom.").queue();
+
+                        u.firstName(event.getMessage().getContentDisplay());
+
+                        break;
+
+                    case 1:
+                        event.getTextChannel().sendMessage("Veuillez choisir un nom").queue();
+                        u.name(event.getMessage().getContentDisplay());
+                        break;
+
+                }
+
+                main.getCore().getInscription().remove(u);
+                main.getCore().getInscription().put(u, current+1);
+
+            });
+
+
         }
 
     }

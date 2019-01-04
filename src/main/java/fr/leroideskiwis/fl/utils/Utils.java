@@ -146,6 +146,7 @@ public class Utils {
 
                         item.setCount(item.getCount()+1);
                         items.remove(items.get(b));
+                        a--;
 
                         break;
                     }

@@ -20,18 +20,26 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import fr.leroideskiwis.fl.game.Player.PlayerBuilder;
 
 public class CommandCore {
 
     private List<SimpleCommand> simpleCommands = new ArrayList<>();
     private Main main;
+    private Map<PlayerBuilder, Integer> inscription = new HashMap<>();
 
     public CommandCore(Main main) {
         this.main = main;
         registerCommand(new CommandsBasics());
         registerCommand(new CommandsFarm(main));
         registerCommand(new CommandsAdmin());
+    }
+
+    public Map<PlayerBuilder, Integer> getInscription() {
+        return inscription;
     }
 
     public List<SimpleCommand> getSimpleCommands() {
@@ -79,7 +87,8 @@ public class CommandCore {
                         return;
                     }
 
-                    main.getPlayers().add(new Player(job, u));
+                    //if(inscription.keySet().stream().map(b -> b.getUser()).noneMatch(u -> u == member.getUser())) inscription.put(new PlayerBuilder().user(member.getUser()), 0);
+
                     close();
 
                     channel.sendMessage(member.getAsMention()+", Vous avez maintenant le métier "+job.toString().toLowerCase()+".\nVotre but principal est désormais : **"+job.getFinalQuest()+"**").queue();
@@ -151,7 +160,7 @@ public class CommandCore {
 
 
 
-    public String[] getArgs(String cmd){
+    private String[] getArgs(String cmd){
 
         String[] split = cmd.split(" ");
         String[] args = new String[split.length-1];

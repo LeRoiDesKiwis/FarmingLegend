@@ -33,7 +33,7 @@ public class ItemSell {
                 .map(g -> g.getTextChannelById(main.getShops().get(g).getId()))
                 .forEach(tx -> tx.sendMessage(new EmbedBuilder()
                         .setColor(Color.ORANGE)
-                        .setAuthor("Vente de "+item.getCount()+" "+item.getMaterial().toString().toLowerCase()+" par"+seller.getUser().getName()+" à "+price, null, seller.getUser().getAvatarUrl())
+                        .setAuthor("Vente de "+item.getCount()+" "+item.getMaterial().toString().toLowerCase()+" par"+seller.getUser().getName()+" à "+price+"€", null, seller.getUser().getAvatarUrl())
                         .setDescription("Pour l'acheter, faites "+main.getPrefixeAsString()+"buy "+id)
                         .setFooter("id : "+id, null)
                         .build()).queue());
