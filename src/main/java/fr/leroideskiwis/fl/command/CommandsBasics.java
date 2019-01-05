@@ -159,6 +159,22 @@ public class CommandsBasics {
 
     }
 
+    @Command(name="info",syntaxe = "!s!info <material>")
+    public void info(TextChannel channel, String[] args){
+
+        Material mat = Material.valueOf(args[0].toUpperCase());
+
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.ORANGE)
+                .setTitle("Infos sur le "+mat.toString().toLowerCase())
+                .addField("Prix conseillé : ", mat.getPrice()+"", false)
+                .addField("Prix minimum : ", (mat.getPrice()*0.5 <= 0 ? 0 : mat.getPrice()*0.5)+"", false)
+                .addField("Prix maximum : ", mat.getPrice()*2+"", false)
+                .addField("Description : ", "coming soon...", false);
+
+        channel.sendMessage(builder.build()).queue();
+
+    }
+
     @Command(name="sell", syntaxe ="!s!sell <material> <count>")
     public void shop(Message msg, ReactionCore core, String[] args, Player p, Main main, Guild g, TextChannel channel) throws Exception {
 
@@ -187,7 +203,9 @@ public class CommandsBasics {
 
         EmbedBuilder builder = new EmbedBuilder().setColor(Color.CYAN)
                 .setTitle("Mettez un prix")
-                .setDescription("Prix : 5€"); channel.sendMessage(builder.build()).queue(m -> {
+                .setDescription("Prix : 5€")
+                ;
+        channel.sendMessage(builder.build()).queue(m -> {
 
             new ReactionMenu(core, 30000) {
                 @Override
@@ -203,9 +221,9 @@ public class CommandsBasics {
                     int currentPrice = sell.getPrice();
                     int newPrice = clicked.getName().equals("➖") ? currentPrice-5 : currentPrice+5;
 
-                    if(newPrice < 0){
+                    if(newPrice < 0 || newPrice < material.getPrice()*0.5 || newPrice > material.getPrice()*2){
 
-                        target.editMessage(new EmbedBuilder(builder).setColor(Color.RED).setTitle("Vous ne pouvez pas mettre un prix inférieur ou égal à 0 !").build()).queue(msg -> {
+                        target.editMessage(new EmbedBuilder(builder).setColor(Color.RED).setTitle("Vous n'avez pas renseigné un prix correct ! Faites ;info "+ material.toString().toLowerCase()+" pour en savoir plus !").build()).queue(msg -> {
                             try {
                                 Thread.sleep(2000);
                                 msg.editMessage(builder.build()).queue();

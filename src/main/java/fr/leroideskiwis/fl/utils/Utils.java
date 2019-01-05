@@ -90,6 +90,11 @@ public class Utils {
 
     }
 
+    public int getRandomNumber(int min, int max){
+
+        return (int)(Math.random() * (max - min)+1) +min;
+
+    }
 
     public Object[] stackAnItem(Material mat, int stack, List<Item> items){
 

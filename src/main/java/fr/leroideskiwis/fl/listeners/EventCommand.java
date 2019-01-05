@@ -20,6 +20,10 @@ public class EventCommand extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
+        //TODO délai pour le ratelimit (genre 2sec/commande) et ne pas envoyer de message pour dire qu'il lui reste tant de seconde sinon yaura toujours le probleme du ratelimit
+        //TODO autre idée : Mettre toutes les demandes de commande dans une liste, et les traiter une par une avec un délai entre chaque. (afficher la place dans la queue en message)
+        //TODO en savoir plus sur les ratelimits (si c'est par guild, par bot, comment ça fonctionne etc)
+
         if(event.getMessage().getContentDisplay().startsWith(main.getPrefixeAsString())){
 
             new ThreadFactory(() -> {
