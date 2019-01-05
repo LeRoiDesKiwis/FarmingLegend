@@ -17,10 +17,8 @@ import net.dv8tion.jda.core.entities.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class Main implements Runnable{
 
@@ -50,16 +48,12 @@ public class Main implements Runnable{
 
     }
 
-    public List<User> getDevs(){
-
-        try {
+    public List<User> getDevs() throws IOException {
 
             File file = new File("./admins.txt");
 
-            if (!file.exists()) {
-                file.createNewFile();
+            if (!file.exists()) file.createNewFile();
 
-            } else {
 
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 List<User> toReturn = new ArrayList<>();
@@ -75,18 +69,10 @@ public class Main implements Runnable{
                 reader.close();
 
                 return toReturn;
-            }
-
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-
-        return null;
-
 
     }
 
-    public boolean checkDev(User user){
+    public boolean checkDev(User user) throws IOException {
 
         return getDevs().contains(user);
 
@@ -101,6 +87,8 @@ public class Main implements Runnable{
         return prefixe;
     }
 
+
+    //test
     public String getPrefixeAsString(){
         return String.valueOf(prefixe);
     }
