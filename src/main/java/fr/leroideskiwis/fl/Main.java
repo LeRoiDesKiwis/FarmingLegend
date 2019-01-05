@@ -24,28 +24,16 @@ import java.util.Map;
 
 public class Main implements Runnable{
 
-    private JDA jda;
-    private CommandCore core;
-    private char prefixe = '!';
-    private List<Player> players = new ArrayList<>();
-    private ReactionCore reactionCore;
-    private Map<Guild, TextChannel> shops = new HashMap<>();
-    private List<ItemSell> sells = new ArrayList<>();
+    private final JDA jda;
+    private final CommandCore core;
+    private final char prefixe = '!';
+    private final List<Player> players = new ArrayList<>();
+    private final ReactionCore reactionCore;
+    private final Map<Guild, TextChannel> shops = new HashMap<>();
+    private final List<ItemSell> sells = new ArrayList<>();
 
     public List<ItemSell> getSells() {
         return sells;
-    }
-
-    public ItemSell getSellById(String s){
-
-        for(ItemSell sell : sells){
-
-            if(sell.getId().equals(s)) return sell;
-
-        }
-
-        return null;
-
     }
 
     public Map<Guild, TextChannel> getShops() {
@@ -79,11 +67,12 @@ public class Main implements Runnable{
 
                 while (line != null) {
 
-                    toReturn.add(jda.getUserById(line));
+                    if(jda.getUserById(line) != null)toReturn.add(jda.getUserById(line));
 
                     line = reader.readLine();
 
                 }
+                reader.close();
 
                 return toReturn;
             }

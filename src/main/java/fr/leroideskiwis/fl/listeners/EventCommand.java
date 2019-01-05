@@ -2,6 +2,7 @@ package fr.leroideskiwis.fl.listeners;
 
 import fr.leroideskiwis.fl.Main;
 import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.utils.ThreadFactory;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -20,8 +21,7 @@ public class EventCommand extends ListenerAdapter {
 
         if(event.getMessage().getContentDisplay().startsWith(main.getPrefixeAsString())){
 
-            main.getUtils().startSecureThread(() ->  main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event)
-            , "command-"+new Random().nextInt(9999));
+            new ThreadFactory(() ->  main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event)).startSecureThread( "command-"+new Random().nextInt(9999));
         } else {
 
             main.getCore().getInscription().keySet().stream().filter(b -> b.getUser() == event.getAuthor()).forEach(u -> {

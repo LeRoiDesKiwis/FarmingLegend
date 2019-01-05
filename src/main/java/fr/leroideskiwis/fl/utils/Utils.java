@@ -90,40 +90,6 @@ public class Utils {
 
     }
 
-    public void startSecureThread(Runnable runnable, String name){
-
-        new Thread(() -> {
-
-            Thread th = new Thread(runnable);
-            if(name != null) th.setName(name);
-            th.setDaemon(true);
-            th.start();
-
-            try {
-                th.join(60000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if(th.isAlive()){
-
-                while(th.getState() != Thread.State.TIMED_WAITING & th.getState() !=Thread.State.WAITING) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                th.interrupt();
-                if(th.isAlive()) th.stop();
-                System.err.println("Le thread "+th.getName()+" a été interrompu par sécurité.");
-
-            }
-
-        }, "Sous-thread").start();
-
-    }
 
     public Object[] stackAnItem(Material mat, int stack, List<Item> items){
 
