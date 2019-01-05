@@ -24,13 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import fr.leroideskiwis.fl.game.Player.PlayerBuilder;
 
 public class CommandCore {
 
     private List<SimpleCommand> simpleCommands = new ArrayList<>();
     private Main main;
-    private Map<PlayerBuilder, Integer> inscription = new HashMap<>();
 
     public CommandCore(Main main) {
         this.main = main;
@@ -39,9 +37,6 @@ public class CommandCore {
         registerCommand(new CommandsAdmin());
     }
 
-    public Map<PlayerBuilder, Integer> getInscription() {
-        return inscription;
-    }
 
     public List<SimpleCommand> getSimpleCommands() {
         return simpleCommands;
@@ -88,9 +83,8 @@ public class CommandCore {
                         return;
                     }
 
-                    //if(inscription.keySet().stream().map(b -> b.getUser()).noneMatch(u -> u == member.getUser())) inscription.put(new PlayerBuilder().user(member.getUser()), 0);
-
                     close();
+                    main.getPlayers().add(new Player(job, member.getUser()));
 
                     channel.sendMessage(member.getAsMention()+", Vous avez maintenant le métier "+job.toString().toLowerCase()+".\nVotre but principal est désormais : **"+job.getFinalQuest()+"**").queue();
 

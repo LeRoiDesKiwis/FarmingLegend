@@ -10,12 +10,14 @@ import fr.leroideskiwis.fl.game.Material;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.reactionmenu.ReactionCore;
 import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
+import fr.leroideskiwis.fl.utils.MessageHandler;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +57,7 @@ public class CommandsBasics {
     }
 
     @Command(name="help", description="affiche la liste des commandes")
-    public void help(Guild g, Main main, CommandCore core, Member m, User user, TextChannel channel){
+    public void help(Guild g, Main main, CommandCore core, Member m, User user, TextChannel channel) throws IOException {
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(Color.GRAY);
@@ -79,7 +81,7 @@ public class CommandsBasics {
     }
 
     @Command(name="suggest")
-    public void onSuggest(User u, Main main, TextChannel textChannel, String[] args){
+    public void onSuggest(User u, Main main, TextChannel textChannel, String[] args) throws IOException {
 
         for (User dev : main.getDevs()) {
 
@@ -169,7 +171,12 @@ public class CommandsBasics {
 
         Object[] objects = main.getUtils().stackAnItem(material, count, unstack);
 
-        if(objects == null) throw new Exception();
+        if(objects == null) {
+
+            channel.sendMessage(new MessageHandler().embedError("Vous n'avez pas assez de "+ material.toString().toLowerCase())).queue();
+            return;
+
+        }
         Item item = (Item)objects[1];
 
         p.getInventory().stack((List<Item>)objects[0]);
@@ -180,7 +187,7 @@ public class CommandsBasics {
 
         EmbedBuilder builder = new EmbedBuilder().setColor(Color.CYAN)
                 .setTitle("Mettez un prix")
-                .setDescription("Prix : 0€"); channel.sendMessage(builder.build()).queue(m -> {
+                .setDescription("Prix : 5€"); channel.sendMessage(builder.build()).queue(m -> {
 
             new ReactionMenu(core, 30000) {
                 @Override
@@ -193,14 +200,26 @@ public class CommandsBasics {
                         return;
                     }
 
-
-
                     int currentPrice = sell.getPrice();
                     int newPrice = clicked.getName().equals("➖") ? currentPrice-5 : currentPrice+5;
-                    sell.setPrice(newPrice);
 
-                    target.editMessage(builder.setDescription("Prix : "+newPrice+"€").build()).queue();
+                    if(newPrice < 0){
 
+                        target.editMessage(new EmbedBuilder(builder).setColor(Color.RED).setTitle("Vous ne pouvez pas mettre un prix inférieur ou égal à 0 !").build()).queue(msg -> {
+                            try {
+                                Thread.sleep(2000);
+                                msg.editMessage(builder.build()).queue();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        });
+
+                    } else {
+                        sell.setPrice(newPrice > 0 ? newPrice : currentPrice);
+
+                        target.editMessage(builder.setColor(Color.CYAN).setDescription("Prix : " + newPrice + "€").build()).queue();
+                    }
                 }
 
             }.addReaction("➖").addReaction("➕").addReaction("\uD83C\uDD97").build(m, msg);

@@ -87,7 +87,7 @@ public class Main implements Runnable{
         return prefixe;
     }
 
-    
+
     public String getPrefixeAsString(){
         return String.valueOf(prefixe);
     }

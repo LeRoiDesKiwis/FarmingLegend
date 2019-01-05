@@ -19,7 +19,7 @@ public class Player {
     private float food;
     private int energy;
 
-    public Player(Job job, User user, String name, String firstname, int age) {
+    public Player(Job job, User user) {
         this.job = job;
         this.user = user;
         this.maxHealth = job.getDefaultHealth();
@@ -174,64 +174,5 @@ public class Player {
     public void addXp(int i) {
         this.xp+=i;
 
-    }
-
-    public static class PlayerBuilder{
-
-        private Job job;
-        private User user;
-        private String name;
-        private String firstName;
-        private int age;
-
-        public PlayerBuilder job(Job job) {
-            this.job = job;
-            return this;
-        }
-
-        public PlayerBuilder user(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public PlayerBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public PlayerBuilder firstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public PlayerBuilder age(int age) {
-            this.age = age;
-            return this;
-        }
-
-        public Player build(){
-            return new Player(job, user, name, firstName, age);
-
-        }
-
-        public Job getJob() {
-            return job;
-        }
-
-        public User getUser() {
-            return user;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public int getAge() {
-            return age;
-        }
     }
 }
