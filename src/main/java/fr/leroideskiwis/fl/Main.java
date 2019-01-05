@@ -129,10 +129,15 @@ public class Main implements Runnable{
 
     }
 
-    private String readToken(){
-        try {
+    private String readToken() throws IOException{
 
-            FileReader stream = new FileReader(new File("./token.txt"));
+            File file = new File("./token.txt");
+
+            if(!file.exists()) file.createNewFile();
+
+            FileReader stream = new FileReader(file);
+
+
 
             int c = stream.read();
 
@@ -146,11 +151,6 @@ public class Main implements Runnable{
             }
 
             return builder.toString();
-        }catch(Throwable t){
-            t.printStackTrace();
-        }
-
-        return null;
 
     }
 
