@@ -26,7 +26,7 @@ public class ItemSell {
 
         do {
             this.id = new Utils(main).generateStringWithRandomChars();
-        }while(main.getSells().stream().map(i -> i.getId()).noneMatch(id -> this.id.equals(id)));
+        }while(main.getSells().stream().map(i -> i.getId()).anyMatch(id -> this.id.equals(id)));
 
         main.getJda().getGuilds().stream()
                 .filter(g -> main.getShops().containsKey(g))

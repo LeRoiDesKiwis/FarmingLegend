@@ -21,8 +21,6 @@ public class EventCommand extends ListenerAdapter {
         this.main = main;
     }
 
-    //TODO délai pour le ratelimit (genre 2sec/commande) et ne pas envoyer de message pour dire qu'il lui reste tant de seconde sinon yaura toujours le probleme du ratelimit
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 

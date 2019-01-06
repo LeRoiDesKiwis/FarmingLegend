@@ -104,27 +104,17 @@ public class Utils {
 
         while(count != stack){
 
-            boolean isBreak = false;
             int current = count;
 
-            for(int a = 0; a < items.size(); a++){
+                for(int b = 0; b < items.size(); b++){
 
-                for(int b = a+1; b < items.size(); b++){
-
-                    if(items.get(a).getMaterial() == items.get(b).getMaterial()) {
+                    if(items.get(b).getMaterial() == mat && items.get(b).getCount() == 1) {
                         count++;
-                        isBreak = true;
 
                         item.setCount(item.getCount()+1);
                         items.remove(items.get(b));
-                        a--;
-
                         break;
                     }
-
-                }
-
-                if(isBreak) break;
 
             }
 

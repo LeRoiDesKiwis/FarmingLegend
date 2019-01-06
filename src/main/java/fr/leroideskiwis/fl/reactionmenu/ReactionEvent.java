@@ -27,7 +27,6 @@ public class ReactionEvent extends ListenerAdapter {
 
             if(menu.isDeleteReaction()) event.getReaction().removeReaction(event.getUser()).queue();
 
-
             if(menu.member.getUser().getId().equals(event.getMember().getUser().getId()) && menu.target.getId().equals(event.getMessageId())){
 
                 menu.onReaction(event.getReactionEmote());

@@ -13,7 +13,6 @@ import fr.leroideskiwis.fl.reactionmenu.ReactionMenu;
 import fr.leroideskiwis.fl.utils.MessageHandler;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
 import java.awt.*;
@@ -199,11 +198,11 @@ public class CommandsBasics {
 
         p.getInventory().setItems((List<Item>)objects[0]);
 
-        ItemSell sell = new ItemSell(main, item, p, 0);
+        ItemSell sell = new ItemSell(main, item, p, material.getPrice());
 
         EmbedBuilder builder = new EmbedBuilder().setColor(Color.CYAN)
                 .setTitle("Mettez un prix")
-                .setDescription("Prix : 5€")
+                .setDescription("Prix : "+ material.getPrice()+"€")
                 ;
         channel.sendMessage(builder.build()).queue(m -> {
 
@@ -223,7 +222,7 @@ public class CommandsBasics {
 
                     if(newPrice < 0 || newPrice < material.getPrice()*0.5 || newPrice > material.getPrice()*2){
 
-                        target.editMessage(new EmbedBuilder(builder).setColor(Color.RED).setTitle("Vous n'avez pas renseigné un prix correct ! Faites ;info "+ material.toString().toLowerCase()+" pour en savoir plus !").build()).queue(msg -> {
+                        target.editMessage(new EmbedBuilder(builder).setColor(Color.RED).setTitle("Vous n'avez pas renseigné un prix correct ! Faites "+main.getPrefixeAsString()+"info "+ material.toString().toLowerCase()+" pour en savoir plus !").build()).queue(msg -> {
                             try {
                                 Thread.sleep(2000);
                                 msg.editMessage(builder.build()).queue();
@@ -234,7 +233,7 @@ public class CommandsBasics {
                         });
 
                     } else {
-                        sell.setPrice(newPrice > 0 ? newPrice : currentPrice);
+                        sell.setPrice(newPrice);
 
                         target.editMessage(builder.setColor(Color.CYAN).setDescription("Prix : " + newPrice + "€").build()).queue();
                     }
