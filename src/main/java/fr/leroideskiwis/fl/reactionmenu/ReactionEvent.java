@@ -1,9 +1,5 @@
 package fr.leroideskiwis.fl.reactionmenu;
 
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -27,7 +23,7 @@ public class ReactionEvent extends ListenerAdapter {
 
             if(menu.isDeleteReaction()) event.getReaction().removeReaction(event.getUser()).queue();
 
-            if(menu.member.getUser().getId().equals(event.getMember().getUser().getId()) && menu.target.getId().equals(event.getMessageId())){
+            if(menu.member.getUser().getId().equals(event.getMember().getUser().getId()) && menu.botMessage.getId().equals(event.getMessageId())){
 
                 menu.onReaction(event.getReactionEmote());
 

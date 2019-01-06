@@ -133,7 +133,7 @@ public class Player {
 
     }
 
-    public Inventory getInventory() {
+    public synchronized Inventory getInventory() {
         return inventory;
 
     }
@@ -174,5 +174,13 @@ public class Player {
     public void addXp(int i) {
         this.xp+=i;
 
+    }
+
+    public void removeMoney(int price) {
+        this.money -= price;
+    }
+
+    public void addMoney(int money) {
+        this.money += money;
     }
 }

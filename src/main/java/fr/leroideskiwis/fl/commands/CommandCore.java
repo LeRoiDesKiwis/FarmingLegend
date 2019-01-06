@@ -202,6 +202,7 @@ public class CommandCore {
             else if(params[i].getType() == JDA.class) objects[i] = main.getJda();
             else if(params[i].getType() == Main.class) objects[i] = main;
             else if(params[i].getType() == getClass()) objects[i] = this;
+            else if(params[i].getType() == MessageHandler.class) objects[i] = new MessageHandler();
             else if(params[i].getType() == MessageReceivedEvent.class) objects[i] = e;
             else if(params[i].getType() == Player.class) {
 
@@ -221,10 +222,7 @@ public class CommandCore {
 
         simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
 
-
         if(player != null) player.levelUp(e.getTextChannel());
-
-
 
     }
 
