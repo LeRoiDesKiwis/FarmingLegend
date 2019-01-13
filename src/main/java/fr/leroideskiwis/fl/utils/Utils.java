@@ -1,21 +1,17 @@
 package fr.leroideskiwis.fl.utils;
 
 import fr.leroideskiwis.fl.Main;
-import fr.leroideskiwis.fl.game.Item;
-import fr.leroideskiwis.fl.game.Job;
-import fr.leroideskiwis.fl.game.Material;
-import fr.leroideskiwis.fl.game.Player;
+import fr.leroideskiwis.fl.game.*;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.requests.RestAction;
 
 import java.awt.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class Utils {
 
@@ -90,47 +86,42 @@ public class Utils {
 
     }
 
+    public int getRandomNumber(int min, int max){
 
-    public Object[] stackAnItem(Material mat, int stack, List<Item> items){
+        return (int)(Math.random() * (max - min)+1) +min;
 
-        int count = 0;
+    }
+
+    /**
+     * @param mat
+     * @param stack
+     * @param inv
+     * @return An arraylist for the first and a item for the deuxieme
+     */
+
+    public Item stackAnItem(Material mat, int stack, Inventory inv) {
+
+        if(inv.getItem(mat).getCount() <= stack) return null;
 
         Item item = new Item(mat, 0);
+        inv.unstack(inv.getItems());
 
-        while(count != stack){
+        for (int i = 0; i < stack; i++) {
 
-            boolean isBreak = false;
-            int current = count;
+            for (Item it : inv.getItems()) {
 
-            for(int a = 0; a < items.size(); a++){
-
-                for(int b = a+1; b < items.size(); b++){
-
-                    if(items.get(a).getMaterial() == items.get(b).getMaterial()) {
-                        count++;
-                        isBreak = true;
-
-                        item.setCount(item.getCount()+1);
-                        items.remove(items.get(b));
-                        a--;
-
-                        break;
-                    }
-
+                if (it.getMaterial() == mat && it.getCount() == 1) {
+                    item.setCount(item.getCount() + 1);
+                    inv.getItems().remove(it);
+                    break;
                 }
 
-                if(isBreak) break;
-
             }
-
-            if(count == current) return null;
-
         }
 
-        if(item.getCount() < stack) return null;
+            inv.stack();
 
-        return new Object[]{items, item};
-
+        return item;
     }
 
     public String generateStringWithRandomChars(){

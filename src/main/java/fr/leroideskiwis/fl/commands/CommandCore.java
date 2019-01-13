@@ -16,6 +16,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -23,13 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import fr.leroideskiwis.fl.game.Player.PlayerBuilder;
 
 public class CommandCore {
 
     private List<SimpleCommand> simpleCommands = new ArrayList<>();
     private Main main;
-    private Map<PlayerBuilder, Integer> inscription = new HashMap<>();
 
     public CommandCore(Main main) {
         this.main = main;
@@ -38,9 +37,6 @@ public class CommandCore {
         registerCommand(new CommandsAdmin());
     }
 
-    public Map<PlayerBuilder, Integer> getInscription() {
-        return inscription;
-    }
 
     public List<SimpleCommand> getSimpleCommands() {
         return simpleCommands;
@@ -87,9 +83,8 @@ public class CommandCore {
                         return;
                     }
 
-                    //if(inscription.keySet().stream().map(b -> b.getUser()).noneMatch(u -> u == member.getUser())) inscription.put(new PlayerBuilder().user(member.getUser()), 0);
-
                     close();
+                    main.getPlayers().add(new Player(job, member.getUser()));
 
                     channel.sendMessage(member.getAsMention()+", Vous avez maintenant le métier "+job.toString().toLowerCase()+".\nVotre but principal est désormais : **"+job.getFinalQuest()+"**").queue();
 
@@ -109,13 +104,13 @@ public class CommandCore {
 
     }
 
-    public boolean checkPerms(Guild g, User u, RoleCommand needed){
+    public boolean checkPerms(Guild g, User u, RoleCommand needed) throws IOException {
 
         return needed == RoleCommand.ALL || main.checkDev(u) || (needed == RoleCommand.OWNER && u.equals(g.getOwner().getUser()));
 
     }
 
-    public void commandUser(String cmd, MessageReceivedEvent e){
+    public void commandUser(String cmd, MessageReceivedEvent e) throws IOException {
 
         Player p = main.getUtils().getPlayer(e.getAuthor());
 
@@ -207,6 +202,7 @@ public class CommandCore {
             else if(params[i].getType() == JDA.class) objects[i] = main.getJda();
             else if(params[i].getType() == Main.class) objects[i] = main;
             else if(params[i].getType() == getClass()) objects[i] = this;
+            else if(params[i].getType() == MessageHandler.class) objects[i] = new MessageHandler();
             else if(params[i].getType() == MessageReceivedEvent.class) objects[i] = e;
             else if(params[i].getType() == Player.class) {
 
@@ -226,10 +222,7 @@ public class CommandCore {
 
         simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
 
-
         if(player != null) player.levelUp(e.getTextChannel());
-
-
 
     }
 

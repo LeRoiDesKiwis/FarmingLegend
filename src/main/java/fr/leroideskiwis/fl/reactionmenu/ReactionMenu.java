@@ -9,7 +9,7 @@ public abstract class ReactionMenu {
 
     private ReactionCore core;
     private int timeout;
-    public Message msg, target;
+    public Message userMessage, botMessage;
     public Member member;
     public TextChannel channel;
     private List<String> reactions = new ArrayList<>();
@@ -43,28 +43,28 @@ public abstract class ReactionMenu {
 
     public void close(){
 
-        target.delete().queue();
+        botMessage.delete().queue();
         core.deleteMenu(this);
 
     }
 
-    public ReactionMenu build(Message target, Message msg){
+    public ReactionMenu build(Message botMessage, Message userMessage){
         core.addMenu(this);
-        this.msg = msg;
-        this.target = target;
-        this.member = msg.getMember();
-        this.channel = msg.getTextChannel();
+        this.userMessage = userMessage;
+        this.botMessage = botMessage;
+        this.member = userMessage.getMember();
+        this.channel = userMessage.getTextChannel();
 
         for(String s : reactions){
 
-            target.addReaction(s).queue();
+            botMessage.addReaction(s).queue();
 
         }
 
         new Thread(() -> {
 
             try {
-                Thread.sleep(timeout*1000);
+                Thread.sleep(timeout);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -76,7 +76,7 @@ public abstract class ReactionMenu {
                 channel.sendMessage(core.getMain().getUtils().embedError("Vous avez attendu trop longtemps !")).queue();
             }
 
-        }, "reaction-"+msg.getId()).start();
+        }, "reaction-"+userMessage.getId()).start();
 
         return this;
 

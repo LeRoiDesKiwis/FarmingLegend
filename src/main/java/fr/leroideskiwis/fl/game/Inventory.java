@@ -12,6 +12,20 @@ public class Inventory {
 
     public Inventory(Player p){
         this.owner = p;
+    }
+
+    /**
+     *
+     * @param mat
+     * @return null if there a no item with this material and the item with the material if there are an item with this material
+     */
+
+    public Item getItem(Material mat){
+
+        for(Item i : items){
+            if(i.getMaterial() == mat) return i;
+        }
+        return null;
 
     }
 
@@ -102,20 +116,33 @@ public class Inventory {
         return items;
     }
 
+    public List<Item> copyunstacked(){
+
+        List<Item> copy = new ArrayList<>(items);
+        unstack(copy);
+
+        return copy;
+
+    }
+
     public void removeItem(Material material, int count) {
+
+        List<Item> copy = copyunstacked();
 
         for(int i = 0; i < count; i++){
 
-            for(Item item : items){
+            for(Item item : copy){
 
                 if(item.getMaterial() == material){
-                    items.remove(item);
+                    copy.remove(item);
                     break;
                 }
 
             }
 
         }
+
+        setItems(copy);
 
     }
 }

@@ -3,14 +3,19 @@ package fr.leroideskiwis.fl.listeners;
 import fr.leroideskiwis.fl.Main;
 import fr.leroideskiwis.fl.game.Player;
 import fr.leroideskiwis.fl.utils.ThreadFactory;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class EventCommand extends ListenerAdapter {
 
     private Main main;
+    private Map<User, Long> cooldowns = new HashMap<>();
 
     public EventCommand(Main main) {
         this.main = main;
@@ -19,46 +24,30 @@ public class EventCommand extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
+        if(event.getAuthor() == main.getJda().getSelfUser()) return;
+
         if(event.getMessage().getContentDisplay().startsWith(main.getPrefixeAsString())){
 
-            new ThreadFactory(() ->  main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event)).startSecureThread( "command-"+new Random().nextInt(9999));
-        } else {
+            if(cooldowns.containsKey(event.getAuthor())){
 
-            main.getCore().getInscription().keySet().stream().filter(b -> b.getUser() == event.getAuthor()).forEach(u -> {
+                int delay = 3;
 
-                if(event.getMessage().getContentDisplay().equalsIgnoreCase("cancel")){
+                int remain = (int)(System.currentTimeMillis()/1000-cooldowns.get(event.getAuthor())/1000);
 
-                    event.getTextChannel().sendMessage("Vous avez annulé votre inscription !").queue();
-                    main.getCore().getInscription().remove(u);
-                    return;
+                if(remain < delay) return;
+                cooldowns.remove(event.getAuthor());
 
+            }
+            cooldowns.put(event.getAuthor(), System.currentTimeMillis());
+
+
+            new ThreadFactory(() -> {
+                try {
+                    main.getCore().commandUser(event.getMessage().getContentDisplay().replaceFirst(main.getPrefixeAsString(), ""), event);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                int current = main.getCore().getInscription().get(u);
-
-                switch (current){
-
-                    case 0:
-
-                        event.getTextChannel().sendMessage("Veuillez choisir un prénom.").queue();
-
-                        u.firstName(event.getMessage().getContentDisplay());
-
-                        break;
-
-                    case 1:
-                        event.getTextChannel().sendMessage("Veuillez choisir un nom").queue();
-                        u.name(event.getMessage().getContentDisplay());
-                        break;
-
-                }
-
-                main.getCore().getInscription().remove(u);
-                main.getCore().getInscription().put(u, current+1);
-
-            });
-
-
+            }).startSecureThread( "command-"+new Random().nextInt(9999));
         }
 
     }

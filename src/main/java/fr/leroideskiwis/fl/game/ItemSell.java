@@ -3,8 +3,11 @@ package fr.leroideskiwis.fl.game;
 import fr.leroideskiwis.fl.Main;
 import fr.leroideskiwis.fl.utils.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.Message;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ItemSell {
 
@@ -13,6 +16,7 @@ public class ItemSell {
     private Main main;
     private String id;
     private int price;
+    private List<Message> msgShop = new ArrayList<>();
 
     public ItemSell(Main main, Item item, Player seller, int price) {
         this.item = item;
@@ -26,7 +30,7 @@ public class ItemSell {
 
         do {
             this.id = new Utils(main).generateStringWithRandomChars();
-        }while(main.getSells().stream().map(i -> i.getId()).noneMatch(id -> this.id.equals(id)));
+        }while(main.getSells().stream().map(i -> i.getId()).anyMatch(id -> this.id.equals(id)));
 
         main.getJda().getGuilds().stream()
                 .filter(g -> main.getShops().containsKey(g))
@@ -36,9 +40,13 @@ public class ItemSell {
                         .setAuthor("Vente de "+item.getCount()+" "+item.getMaterial().toString().toLowerCase()+" par"+seller.getUser().getName()+" à "+price+"€", null, seller.getUser().getAvatarUrl())
                         .setDescription("Pour l'acheter, faites "+main.getPrefixeAsString()+"buy "+id)
                         .setFooter("id : "+id, null)
-                        .build()).queue());
+                        .build()).queue(msg -> msgShop.add(msg)));
 
         return this;
+    }
+
+    public List<Message> getMsgShop() {
+        return msgShop;
     }
 
     public String getId() {

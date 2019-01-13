@@ -157,7 +157,7 @@ public class CommandsFarm {
 
                     if(p.getLevel() < mat.getLevel()) continue;
 
-                    if (Math.random() < mat.getChance()) {
+                    if (Math.random() < (mat.getChance() > 1.0 ? 1.0/(double)main.getUtils().getMaterialJobs(p.getJob()).size() : mat.getChance())) {
 
                         int count = (int) (mat.getChance() * 10);
 
@@ -183,6 +183,7 @@ public class CommandsFarm {
 
         p.removeFood(0.1f);
         p.removeEnergy(5);
+        p.addXp(new Utils().getRandomNumber(2, 7));
 
         items.forEach(i -> {
             p.getInventory().addItem(i);
@@ -193,4 +194,7 @@ public class CommandsFarm {
         channel.sendMessage(builder.build()).queue();
 
     }
+
+
+
 }
